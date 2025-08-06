@@ -8,6 +8,9 @@ import swaggerUi from 'swagger-ui-express';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy settings for Railway/Heroku deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors());
@@ -16,7 +19,9 @@ app.use(cors());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true, // Return rate limit info in headers
+  legacyHeaders: false, // Disable legacy headers
 });
 app.use('/api/', limiter);
 
@@ -85,6 +90,22 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 // Import routes
 import courseRoutes from './routes/courses';
 import professorRoutes from './routes/professors';
+
+// Root route
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'CourseIntel API',
+    version: '1.0.0',
+    description: 'UCR Course Difficulty Intelligence API - Student-verified course ratings and professor insights',
+    documentation: '/docs',
+    health: '/health',
+    api_base: '/api/v1',
+    endpoints: {
+      courses: '/api/v1/courses',
+      professors: '/api/v1/professors'
+    }
+  });
+});
 
 // Health check endpoint
 app.get('/health', (_req, res) => {
