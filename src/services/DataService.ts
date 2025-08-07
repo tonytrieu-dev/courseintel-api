@@ -4,19 +4,49 @@ import path from 'path';
 import { RawCourseData, Course, CourseReview, Professor, Department } from '../models/Course';
 
 export class DataService {
+  private static instance: DataService;
   private courses: Course[] = [];
   private reviews: CourseReview[] = [];
   private professors: Professor[] = [];
   private departments: Department[] = [];
   private isDataLoaded = false;
+  private loadingPromise: Promise<void> | null = null;
 
-  constructor() {
-    // Future: Add caching for performance optimization
+  private constructor() {
+    console.log('🏗️ DataService singleton instance created');
   }
 
-  // Load and process CSV data
+  static getInstance(): DataService {
+    if (!DataService.instance) {
+      DataService.instance = new DataService();
+    }
+    return DataService.instance;
+  }
+
+  // Load and process CSV data with singleton caching
   async loadData(): Promise<void> {
-    if (this.isDataLoaded) return;
+    // If data is already loaded, return immediately
+    if (this.isDataLoaded && this.courses.length > 0) {
+      console.log('📦 Using cached data - instant response!');
+      return;
+    }
+
+    // If loading is in progress, wait for it
+    if (this.loadingPromise) {
+      console.log('⏳ Data loading in progress, waiting...');
+      await this.loadingPromise;
+      return;
+    }
+
+    // Start loading process
+    this.loadingPromise = this.performDataLoad();
+    await this.loadingPromise;
+    this.loadingPromise = null;
+  }
+
+  private async performDataLoad(): Promise<void> {
+    const startTime = Date.now();
+    console.log('🚀 Starting high-performance data loading...');
 
     try {
       const csvPath = path.join(process.cwd(), 'data', 'ucr-courses.csv');
@@ -35,11 +65,14 @@ export class DataService {
       await this.processRawData(rawData);
       
       this.isDataLoaded = true;
-      console.log('✅ Data processing complete!');
+      const loadTime = Date.now() - startTime;
+      console.log(`✅ Data processing complete in ${loadTime}ms!`);
       console.log(`📚 Processed: ${this.courses.length} courses, ${this.reviews.length} reviews, ${this.professors.length} professors`);
+      console.log('🏆 Data cached permanently for instant future requests');
       
     } catch (error) {
       console.error('❌ Error loading course data:', error);
+      this.loadingPromise = null;
       throw new Error('Failed to load course data');
     }
   }
@@ -315,5 +348,5 @@ export class DataService {
   }
 }
 
-// Singleton instance
-export const dataService = new DataService();
+// Singleton instance - use getInstance() for optimal performance
+export const dataService = DataService.getInstance();

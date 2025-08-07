@@ -14,10 +14,32 @@ class DataService {
         this.professors = [];
         this.departments = [];
         this.isDataLoaded = false;
+        this.loadingPromise = null;
+        console.log('🏗️ DataService singleton instance created');
+    }
+    static getInstance() {
+        if (!DataService.instance) {
+            DataService.instance = new DataService();
+        }
+        return DataService.instance;
     }
     async loadData() {
-        if (this.isDataLoaded)
+        if (this.isDataLoaded && this.courses.length > 0) {
+            console.log('📦 Using cached data - instant response!');
             return;
+        }
+        if (this.loadingPromise) {
+            console.log('⏳ Data loading in progress, waiting...');
+            await this.loadingPromise;
+            return;
+        }
+        this.loadingPromise = this.performDataLoad();
+        await this.loadingPromise;
+        this.loadingPromise = null;
+    }
+    async performDataLoad() {
+        const startTime = Date.now();
+        console.log('🚀 Starting high-performance data loading...');
         try {
             const csvPath = path_1.default.join(process.cwd(), 'data', 'ucr-courses.csv');
             console.log('📊 Loading UCR course data from:', csvPath);
@@ -30,11 +52,14 @@ class DataService {
             console.log(`🔢 Found ${rawData.length} raw course records`);
             await this.processRawData(rawData);
             this.isDataLoaded = true;
-            console.log('✅ Data processing complete!');
+            const loadTime = Date.now() - startTime;
+            console.log(`✅ Data processing complete in ${loadTime}ms!`);
             console.log(`📚 Processed: ${this.courses.length} courses, ${this.reviews.length} reviews, ${this.professors.length} professors`);
+            console.log('🏆 Data cached permanently for instant future requests');
         }
         catch (error) {
             console.error('❌ Error loading course data:', error);
+            this.loadingPromise = null;
             throw new Error('Failed to load course data');
         }
     }
@@ -255,5 +280,5 @@ class DataService {
     }
 }
 exports.DataService = DataService;
-exports.dataService = new DataService();
+exports.dataService = DataService.getInstance();
 //# sourceMappingURL=DataService.js.map

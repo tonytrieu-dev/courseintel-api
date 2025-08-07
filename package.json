@@ -14,7 +14,9 @@
     "postinstall": "npm run build",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write src/**/*.ts",
+    "keep-alive": "curl -f https://courseintel-api-production.up.railway.app/health || exit 1",
+    "warmup": "node -e \"console.log('🔥 Warming up API...'); setTimeout(() => { fetch('https://courseintel-api-production.up.railway.app/health').then(() => console.log('✅ API warmed up!')); }, 1000);\""
   },
   "keywords": [
     "ucr",

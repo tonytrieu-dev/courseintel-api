@@ -1,0 +1,56 @@
+# Railway deployment configuration for CourseIntel API
+# Optimized for performance and RapidAPI readiness
+
+deploy:
+  # Keep containers alive to prevent cold starts
+  restartPolicyType: always
+  
+  # Health check configuration for better uptime
+  healthcheckPath: /health
+  healthcheckTimeout: 30s
+  healthcheckInterval: 30s
+  
+  # Performance optimizations
+  minReplicas: 1
+  maxReplicas: 3
+
+build:
+  # Build command (already handled by package.json postinstall)
+  builder: NIXPACKS
+
+# Environment variables for production
+env:
+  NODE_ENV: production
+  PORT: ${{ PORT }}
+  RAILWAY_STATIC_URL: ${{ RAILWAY_STATIC_URL }}
+  
+  # Professor service configuration
+  PROFESSOR_API_URL: http://localhost:5000
+  ENABLE_ENHANCED_PROFESSORS: true
+
+# Networking
+networking:
+  # Enable external connections
+  serviceDomain: courseintel-api-production.up.railway.app
+
+# Resource configuration for optimal performance
+resources:
+  # Memory allocation (Railway free tier)
+  memory: 512Mi
+  cpu: 0.5
+
+# Monitoring and alerts
+monitoring:
+  # Basic monitoring enabled
+  enabled: true
+  
+# Performance optimization settings
+performance:
+  # Enable response compression
+  compression: true
+  
+  # Request timeout settings
+  timeout: 30s
+  
+  # Connection limits
+  maxConnections: 1000

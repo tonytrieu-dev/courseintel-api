@@ -1,12 +1,16 @@
 import { Course, CourseReview, Professor, Department } from '../models/Course';
 export declare class DataService {
+    private static instance;
     private courses;
     private reviews;
     private professors;
     private departments;
     private isDataLoaded;
-    constructor();
+    private loadingPromise;
+    private constructor();
+    static getInstance(): DataService;
     loadData(): Promise<void>;
+    private performDataLoad;
     private processRawData;
     private normalizeCourseCode;
     private extractDepartment;

@@ -210,6 +210,49 @@ router.get('/search', (req, res) => professorController.searchProfessors(req, re
 
 /**
  * @swagger
+ * /api/v1/professors/health:
+ *   get:
+ *     summary: Check Enhanced Professor API health
+ *     tags: [Professors]
+ *     responses:
+ *       200:
+ *         description: Professor service health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       enum: ["healthy", "degraded", "unavailable"]
+ *                       example: "healthy"
+ *                     response_time:
+ *                       type: number
+ *                       example: 125
+ *                       description: "Response time in milliseconds"
+ *                     cache_stats:
+ *                       type: object
+ *                       properties:
+ *                         keys:
+ *                           type: number
+ *                         hits:
+ *                           type: number
+ *                         misses:
+ *                           type: number
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
+router.get('/health', (req, res) => professorController.healthCheck(req, res));
+
+/**
+ * @swagger
  * /api/v1/professors/{name}:
  *   get:
  *     summary: Get comprehensive professor information
@@ -315,48 +358,5 @@ router.get('/:name', (req, res) => professorController.getProfessorDetails(req, 
  *         description: Analytics service error
  */
 router.get('/:name/analytics', (req, res) => professorController.getProfessorAnalytics(req, res));
-
-/**
- * @swagger
- * /api/v1/professors/health:
- *   get:
- *     summary: Check Enhanced Professor API health
- *     tags: [Professors]
- *     responses:
- *       200:
- *         description: Professor service health status
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     status:
- *                       type: string
- *                       enum: ["healthy", "degraded", "unavailable"]
- *                       example: "healthy"
- *                     response_time:
- *                       type: number
- *                       example: 125
- *                       description: "Response time in milliseconds"
- *                     cache_stats:
- *                       type: object
- *                       properties:
- *                         keys:
- *                           type: number
- *                         hits:
- *                           type: number
- *                         misses:
- *                           type: number
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- */
-router.get('/health', (req, res) => professorController.healthCheck(req, res));
 
 export default router;
